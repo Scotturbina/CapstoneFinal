@@ -9,7 +9,7 @@ library(NLP)
 library(tm)
 
 #Read in Dataset
-#"Dataset <- fread("~/NgramTable_Datatable.txt")"
+Dataset <- fread("NgramTable_Datatable.txt")
 setkeyv(Dataset, c('w1', 'w2', 'w3', 'w4', 'freq'))
 
 Translate_Input <- function(Text){
