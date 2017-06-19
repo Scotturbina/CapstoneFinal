@@ -8,69 +8,75 @@ library(data.table)
 library(NLP)
 library(tm)
 
-#Read in Dataset
+# Reading the dataset 
 Dataset <- fread("NgramTable_Datatable.txt")
 setkeyv(Dataset, c('w1', 'w2', 'w3', 'w4', 'freq'))
 
-Translate_Input <- function(Text){
-  Mod_Input <- tolower(Text)
-  Mod_Input <- stripWhitespace(Mod_Input)
-  Mod_Input <- gsub("[^\\p{L}\\s]+", "", Mod_Input, ignore.case=F, perl=T)
-  return(Mod_Input)
+
+# Cleaning the data
+Input_ready <- function(Text){
+  Text_Cleaned <- tolower(Text)
+  Text_Cleaned <- stripWhitespace(Text_Cleaned)
+  Text_Cleaned <- gsub("[^\\p{L}\\s]+", "", Text_Cleaned, ignore.case=F, perl=T)
+  return(Text_Cleaned)
 }
 
-Split_Translate_Input <- function(Text){
-  Mod_Input <- tolower(Text)
-  Mod_Input <- stripWhitespace(Mod_Input)
-  Mod_Input <- gsub("[^\\p{L}\\s]+", "", Mod_Input, ignore.case=F, perl=T)
-  Split_Trans_Input <- unlist(strsplit(Mod_Input, " "))
-  return(Split_Trans_Input)
+Split_Input_ready <- function(Text){
+  Text_Cleaned <- tolower(Text)
+  Text_Cleaned <- stripWhitespace(Text_Cleaned)
+  Text_Cleaned <- gsub("[^\\p{L}\\s]+", "", Text_Cleaned, ignore.case=F, perl=T)
+  Fixed_Input <- unlist(strsplit(Text_Cleaned, " "))
+  return(Fixed_Input)
 }
+
+#counting Ngrams
+
 
 Word_Count1 <- function(TextInputA){
   NgramsTable <<- Dataset[list("<s>", TextInputA[1])]
   NgramsTable <<- NgramsTable[NgramsTable$w3!="<s>", ]
   NgramsTable <<- NgramsTable[order(NgramsTable$freq, decreasing=TRUE), ]
   
-  #List Alternatives
-  AlternativeGuess <<- as.data.frame(NgramsTable)
-  AlternativeGuess <<- AlternativeGuess[1:5, c("w3", "freq")]
-  AlternativeGuess <<- AlternativeGuess[!is.na(AlternativeGuess$freq), ]
-  AlternativeGuess <<- AlternativeGuess[!duplicated(AlternativeGuess), ]
-  if(nrow(AlternativeGuess)==0){
-    AlternativeGuess <<- data.frame(Word=NA, Likelihood=NA)
+  #Predictions words
+  Alt_pred <<- as.data.frame(NgramsTable)
+  Alt_pred <<- Alt_pred[1:5, c("w3", "freq")]
+  Alt_pred <<- Alt_pred[!is.na(Alt_pred$freq), ]
+  Alt_pred <<- Alt_pred[!duplicated(Alt_pred), ]
+  if(nrow(Alt_pred)==0){
+    Alt_pred <<- data.frame(Word=NA, Likelihood=NA)
   }else{
-    AlternativeGuess$freq <- round(AlternativeGuess$freq/sum(AlternativeGuess$freq)*100, 1)
-    AlternativeGuess <<- AlternativeGuess
-    colnames(AlternativeGuess) <<- c("Word", "Likelihood")
-    rownames(AlternativeGuess) <<- NULL
+    Alt_pred$freq <- round(Alt_pred$freq/sum(Alt_pred$freq)*100, 1)
+    Alt_pred <<- Alt_pred
+    colnames(Alt_pred) <<- c("Word", "Likelihood")
+    rownames(Alt_pred) <<- NULL
   }
   
   Guess_Output <- NgramsTable$w3[1]
   if(is.na(Guess_Output)|is.null(Guess_Output)){
-    Guess_Output <- "We're sorry. This app could not predict the next word. You either picked a rare word or possibly mispelled it."
+    Guess_Output <- "No prediction found :("
   }
   
   return(Guess_Output)
 }
 
+# Counting n grams
 Word_Count2 <- function(TextInputB){
   NgramsTable <<- Dataset[list("<s>", TextInputB[1], TextInputB[2])]
   NgramsTable <<- NgramsTable[NgramsTable$w4!="<s>", ]
   NgramsTable <<- NgramsTable[order(NgramsTable$freq, decreasing=TRUE), ]
   
-  #List Alternatives
-  AlternativeGuess <<- as.data.frame(NgramsTable)
-  AlternativeGuess <<- AlternativeGuess[1:5, c("w4", "freq")]
-  AlternativeGuess <<- AlternativeGuess[!is.na(AlternativeGuess$freq), ]
-  AlternativeGuess <<- AlternativeGuess[!duplicated(AlternativeGuess), ]
-  if(nrow(AlternativeGuess)==0){
-    AlternativeGuess <<- data.frame(Word=NA, Likelihood=NA)
+  #Predicitons
+  Alt_pred <<- as.data.frame(NgramsTable)
+  Alt_pred <<- Alt_pred[1:5, c("w4", "freq")]
+  Alt_pred <<- Alt_pred[!is.na(Alt_pred$freq), ]
+  Alt_pred <<- Alt_pred[!duplicated(Alt_pred), ]
+  if(nrow(Alt_pred)==0){
+    Alt_pred <<- data.frame(Word=NA, Likelihood=NA)
   }else{
-    AlternativeGuess$freq <- round(AlternativeGuess$freq/sum(AlternativeGuess$freq)*100, 1)
-    AlternativeGuess <<- AlternativeGuess
-    colnames(AlternativeGuess) <<- c("Word", "Likelihood")
-    rownames(AlternativeGuess) <<- NULL
+    Alt_pred$freq <- round(Alt_pred$freq/sum(Alt_pred$freq)*100, 1)
+    Alt_pred <<- Alt_pred
+    colnames(Alt_pred) <<- c("Word", "Likelihood")
+    rownames(Alt_pred) <<- NULL
   }
   
   Guess_Output <- NgramsTable$w4[1]
@@ -81,23 +87,25 @@ Word_Count2 <- function(TextInputB){
   return(Guess_Output)
 }
 
+#Count of n grams
+
 Word_Count3 <- function(TextInputC){
   NgramsTable <<- Dataset[list("<s>", TextInputC[1], TextInputC[2], TextInputC[3])]
   NgramsTable <<- NgramsTable[NgramsTable$w5!="<s>", ]
   NgramsTable <<- NgramsTable[order(NgramsTable$freq, decreasing=TRUE), ]
   
-  #List Alternatives
-  AlternativeGuess <<- as.data.frame(NgramsTable)
-  AlternativeGuess <<- AlternativeGuess[1:5, c("w5", "freq")]
-  AlternativeGuess <<- AlternativeGuess[!is.na(AlternativeGuess$freq), ]
-  AlternativeGuess <<- AlternativeGuess[!duplicated(AlternativeGuess), ]
-  if(nrow(AlternativeGuess)==0){
-    AlternativeGuess <<- data.frame(Word=NA, Likelihood=NA)
+  #Predictions
+  Alt_pred <<- as.data.frame(NgramsTable)
+  Alt_pred <<- Alt_pred[1:5, c("w5", "freq")]
+  Alt_pred <<- Alt_pred[!is.na(Alt_pred$freq), ]
+  Alt_pred <<- Alt_pred[!duplicated(Alt_pred), ]
+  if(nrow(Alt_pred)==0){
+    Alt_pred <<- data.frame(Word=NA, Likelihood=NA)
   }else{
-    AlternativeGuess$freq <- round(AlternativeGuess$freq/sum(AlternativeGuess$freq)*100, 1)
-    AlternativeGuess <<- AlternativeGuess
-    colnames(AlternativeGuess) <<- c("Word", "Likelihood")
-    rownames(AlternativeGuess) <<- NULL
+    Alt_pred$freq <- round(Alt_pred$freq/sum(Alt_pred$freq)*100, 1)
+    Alt_pred <<- Alt_pred
+    colnames(Alt_pred) <<- c("Word", "Likelihood")
+    rownames(Alt_pred) <<- NULL
   }
   
   Guess_Output <- NgramsTable$w5[1]
@@ -116,71 +124,73 @@ library(data.table)
 library(NLP)
 library(tm)
 
-# Define server logic required to summarize and view the selected dataset
+# All server logic
 shinyServer(function(input, output) {    
-  # Generate a summary of the dataset
+  # Dataset Summary
+  
   output$Original <- renderText({
     Original_Input <- input$obs
     return(Original_Input)
   })
   
-  # Generate a summary of the dataset
+ 
   output$Translated <- renderText({
     Original_Input <- input$obs
-    Translated_Input <- Translate_Input(Original_Input)
+    Translated_Input <- Input_ready(Original_Input)
     return(Translated_Input)
   })
   
   # Generate a summary of the dataset
   output$BestGuess <- renderText({
     Original_Input <- input$obs
-    Translated_Input <- Translate_Input(Original_Input)
+    Translated_Input <- Input_ready(Original_Input)
     BestGuess_Output <- "The predicted next word will be here."
-    Split_Trans_Input <- Split_Translate_Input(Original_Input)
-    Word_Count <- length(Split_Trans_Input)
+    Fixed_Input <- Split_Input_ready(Original_Input)
+    Word_Count <- length(Fixed_Input)
     
     if(Word_Count==1){
-      BestGuess_Output <- Word_Count1(Split_Trans_Input)
+      BestGuess_Output <- Word_Count1(Fixed_Input)
     }
     if(Word_Count==2){
-      BestGuess_Output <- Word_Count2(Split_Trans_Input)
+      BestGuess_Output <- Word_Count2(Fixed_Input)
     }
     if(Word_Count==3){
-      BestGuess_Output <- Word_Count3(Split_Trans_Input)
+      BestGuess_Output <- Word_Count3(Fixed_Input)
     }
     if(Word_Count > 3){
-      Words_to_Search <- c(Split_Trans_Input[Word_Count - 2],
-                           Split_Trans_Input[Word_Count - 1],
-                           Split_Trans_Input[Word_Count])
+      Words_to_Search <- c(Fixed_Input[Word_Count - 2],
+                           Fixed_Input[Word_Count - 1],
+                           Fixed_Input[Word_Count])
       BestGuess_Output <- Word_Count3(Words_to_Search)
     }
     return(BestGuess_Output)
   })
   
-  # Show the first "n" observations
+  # Show predictions
+  
   output$view <- renderTable({
     Original_Input <- input$obs
-    Split_Trans_Input <- Split_Translate_Input(Original_Input)
-    Word_Count <- length(Split_Trans_Input)
+    Fixed_Input <- Split_Input_ready(Original_Input)
+    Word_Count <- length(Fixed_Input)
     
     if(Word_Count==1){
-      BestGuess_Output <- Word_Count1(Split_Trans_Input)
+      BestGuess_Output <- Word_Count1(Fixed_Input)
     }
     if(Word_Count==2){
-      BestGuess_Output <- Word_Count2(Split_Trans_Input)
+      BestGuess_Output <- Word_Count2(Fixed_Input)
     }
     if(Word_Count==3){
-      BestGuess_Output <- Word_Count3(Split_Trans_Input)
+      BestGuess_Output <- Word_Count3(Fixed_Input)
     }
     if(Word_Count > 3){
-      Words_to_Search <- c(Split_Trans_Input[Word_Count - 2],
-                           Split_Trans_Input[Word_Count - 1],
-                           Split_Trans_Input[Word_Count])
+      Words_to_Search <- c(Fixed_Input[Word_Count - 2],
+                           Fixed_Input[Word_Count - 1],
+                           Fixed_Input[Word_Count])
       BestGuess_Output <- Word_Count3(Words_to_Search)
     }
     
-    if(exists("AlternativeGuess", where = -1)){
-      AlternativeGuess
+    if(exists("Alt_pred", where = -1)){
+      Alt_pred
     }else{
       XNgramsTable <- data.frame(Word=NA, Likelihood=NA)
     }

@@ -1,32 +1,30 @@
 library(shiny)
 
-# Define UI for dataset viewer application
+
 shinyUI(fluidPage(
   
-  # Application title.
-  titlePanel("The Next Word"),
+  # App title.
+  titlePanel("Word Prediction Application"),
   
   sidebarLayout(
     sidebarPanel(
-      textInput("obs", "Enter Your Statement Here:"),
+      textInput("obs", "Please enter the text here"),
       
-      helpText("Note: This widget will use this statement to predict the most likely next word."),
-      
-      submitButton("Predict Next Word")
+      submitButton("Predict")
     ),
     
     mainPanel(
-      h6("You input the following text:"),
+      h6("Your text is:"),
       textOutput("Original"),
       br(),
-      h6("Your statement has been reformated to the following:"),
+      h6("Your text cleaned for better data modeling and prediction will be"),
       textOutput("Translated"),
       br(),
       br(),
-      h3("Most Likely Next Word:"),
-      div(textOutput("BestGuess"), style = "color:red"),
+      h3("Prediction"),
+      div(textOutput("BestGuess"), style = "color:blue"),
       br(),
-      h3("The program guessed your word based on the following data:"),
+      h3("Based on training text, other words could be:"),
       tableOutput("view")
     )
   )
